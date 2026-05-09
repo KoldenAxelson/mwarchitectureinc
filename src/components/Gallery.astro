@@ -1,0 +1,112 @@
+---
+/**
+ * Server-rendered wrapper around Gallery.vue.
+ *
+ * Receives Astro ImageMetadata (i.e. images that came in via the
+ * `image()` schema in src/content.config.ts) and:
+ *   1. Runs them through Astro's image pipeline at build time to emit
+ *      WebP variants + a srcset.
+ *   2. Hands the optimised URLs to the Vue carousel for hydration.
+ *
+ * Only the carousel logic ships JS; the markup (and the LCP-relevant
+ * first slide) renders statically with Astro's <Image>-derived URLs so
+ * the page is fast and SEO-friendly even before hydration.
+ */
+import { getImage } from "astro:assets";
+import GalleryClient from "./Gallery.vue";
+
+interface Props {
+  /** Resolved ImageMetadata array — typically the entry's `data.galleries[n].images`. */
+  images: ImageMetadata[];
+  /** Optional alt text per image (length should match `images`). */
+  alts?: string[];
+  /** Optional caption shown beneath the carousel. */
+  caption?: string;
+  /**
+   * Slides shown side-by-side on md+ viewports. Defaults to 2 to mirror the
+   * old site's two-up gallery; pass 1 for hero-style full-width carousels.
+   */
+  perView?: 1 | 2;
+  /** Hint passed through as the <img sizes> attribute. */
+  sizes?: string;
+  /** When true, advances slides on a timer. */
+  autoplay?: boolean;
+  /** Hydration directive override — defaults to client:visible. */
+  hydrate?: "load" | "idle" | "visible";
+}
+
+const {
+  images,
+  alts = [],
+  caption,
+  perView = 2,
+  sizes = perView === 2
+    ? "(min-width: 768px) 50vw, 100vw"
+    : "100vw",
+  autoplay = false,
+  hydrate = "visible",
+} = Astro.props;
+
+// Width buckets sized for the actual slide width: 2-up slides peak around
+// 50vw of a 1600px viewport, so 1200px is plenty.
+const widthBuckets =
+  perView === 2
+    ? [400, 600, 800, 1000, 1200]
+    : [600, 900, 1200, 1600, 2000];
+
+const optimised = await Promise.all(
+  images.map(async (img, i) => {
+    const result = await getImage({
+      src: img,
+      widths: widthBuckets,
+      sizes,
+      format: "webp",
+      quality: 78,
+    });
+    return {
+      src: result.src,
+      srcset: result.srcSet?.attribute ?? undefined,
+      width: result.attributes.width ?? img.width,
+      height: result.attributes.height ?? img.height,
+      alt: alts[i] ?? `Project image ${i + 1}`,
+    };
+  })
+);
+---
+
+{
+  hydrate === "load" && (
+    <GalleryClient
+      client:load
+      images={optimised}
+      caption={caption}
+      sizes={sizes}
+      autoplay={autoplay}
+      perView={perView}
+    />
+  )
+}
+{
+  hydrate === "visible" && (
+    <GalleryClient
+      client:visible
+      images={optimised}
+      caption={caption}
+      sizes={sizes}
+      autoplay={autoplay}
+      perView={perView}
+    />
+  )
+}
+{
+  hydrate === "idle" && (
+    <GalleryClient
+      client:idle
+      images={optimised}
+      caption={caption}
+      sizes={sizes}
+      autoplay={autoplay}
+      perView={perView}
+    />
+  )
+}

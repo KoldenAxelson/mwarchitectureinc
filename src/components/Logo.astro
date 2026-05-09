@@ -1,0 +1,31 @@
+---
+import { Image } from "astro:assets";
+import logo from "~/assets/logo.png";
+
+interface Props {
+  /**
+   * Extra classes for the rendered <img>. The image's height is meant to
+   * be driven by the parent (e.g. h-full inside a flex row), so width
+   * derives from `aspect-ratio` automatically.
+   */
+  class?: string;
+  /** When true, requests larger srcset widths for hero placement. */
+  large?: boolean;
+}
+
+const { class: className = "h-full w-auto", large = false } = Astro.props;
+
+// Vertical mark — 295×529 source.
+const aspectRatio = 295 / 529;
+---
+
+<Image
+  src={logo}
+  alt="MW Architecture"
+  widths={large ? [400, 700, 1000] : [200, 320, 480]}
+  sizes={large ? "(min-width: 1024px) 480px, 320px" : "240px"}
+  loading="eager"
+  fetchpriority={large ? "high" : "auto"}
+  style={`aspect-ratio: ${aspectRatio};`}
+  class:list={["block", className]}
+/>

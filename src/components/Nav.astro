@@ -1,0 +1,55 @@
+---
+import Logo from "./Logo.astro";
+
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact" },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header
+  class="sticky top-0 z-40 backdrop-blur-md bg-off-white/85 border-b border-warm-grey/30"
+>
+  <nav
+    class="mx-auto max-w-7xl px-6 sm:px-8 h-20 flex items-center justify-between"
+    aria-label="Primary"
+  >
+    <a
+      href="/"
+      class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40 rounded-sm"
+      aria-label="MW Architecture — Home"
+    >
+      <Logo class="h-[72px] w-[72px]" />
+    </a>
+
+    <ul class="flex items-center gap-7 sm:gap-10 text-[13px] uppercase tracking-[0.16em]">
+      {
+        links.map((l) => {
+          const isActive =
+            path === l.href || (l.href !== "/" && path.startsWith(l.href + "/"));
+          return (
+            <li>
+              <a
+                href={l.href}
+                class:list={[
+                  "relative py-2 transition-colors hover:text-terracotta",
+                  "after:absolute after:left-0 after:right-0 after:-bottom-0.5 after:h-px after:bg-terracotta after:origin-left after:transition-transform",
+                  isActive
+                    ? "text-near-black after:scale-x-100"
+                    : "text-mid-grey after:scale-x-0 hover:after:scale-x-100",
+                ]}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {l.label}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </nav>
+</header>

@@ -1,0 +1,94 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import Gallery from "~/components/Gallery.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((p) => ({
+    params: { slug: p.id },
+    props: { entry: p },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const dateLabel = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+}).format(entry.data.date);
+
+// "Hero" gallery on the project page = the first frontmatter gallery,
+// rendered full-width and 2-up to mirror the legacy site's project pages.
+// The MDX body's own <Gallery /> blocks remain available below for any
+// further inline use, but most projects won't need them.
+const heroGallery = entry.data.galleries[0];
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.summary}>
+  <article>
+    <!-- Title block — appears before the carousel like the old site. -->
+    <header
+      class="mx-auto max-w-7xl px-6 sm:px-8 pt-12 sm:pt-16 pb-8"
+      data-reveal="up"
+    >
+      <p class="text-xs uppercase tracking-[0.2em] text-mid-grey">
+        {entry.data.location} &middot; {dateLabel}
+      </p>
+      <h1 class="mt-4 text-3xl sm:text-5xl text-near-black">
+        {entry.data.title}
+      </h1>
+      {
+        entry.data.categories.length > 0 && (
+          <ul class="mt-5 flex flex-wrap gap-2">
+            {entry.data.categories.map((c) => (
+              <li class="text-[11px] uppercase tracking-[0.16em] border border-warm-grey px-2 py-1 text-mid-grey">
+                {c}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <!-- Hero carousel: 2-up like the old site, drag/swipe + keyboard nav. -->
+    {
+      heroGallery && heroGallery.images.length > 0 && (
+        <section
+          class="mx-auto max-w-7xl px-6 sm:px-8 mb-4"
+          data-reveal="up"
+          data-reveal-delay="120"
+        >
+          <Gallery
+            images={heroGallery.images}
+            perView={2}
+            hydrate="load"
+          />
+        </section>
+      )
+    }
+
+    <!-- Body prose. Any <Gallery /> blocks Moritz adds inline are honored. -->
+    <div
+      class="mx-auto max-w-3xl px-6 sm:px-8 pt-8 pb-24
+             [&>p]:my-6 [&>p]:text-lg [&>p]:leading-relaxed [&>p]:text-body/85
+             [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-2xl"
+      data-reveal="fade"
+      data-reveal-delay="240"
+    >
+      <Content />
+    </div>
+
+    <nav
+      class="mx-auto max-w-3xl px-6 sm:px-8 pb-24 border-t border-warm-grey/40 pt-8 flex justify-between text-sm"
+      aria-label="Project navigation"
+    >
+      <a href="/portfolio" class="hover:text-terracotta transition-colors">
+        ← All projects
+      </a>
+      <a href="/contact" class="hover:text-terracotta transition-colors">
+        Discuss your project →
+      </a>
+    </nav>
+  </article>
+</BaseLayout>

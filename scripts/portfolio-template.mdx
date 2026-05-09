@@ -1,0 +1,67 @@
+---
+# ---------------------------------------------------------------------------
+# PORTFOLIO PROJECT TEMPLATE
+#
+# This file is a reference template. To add a new portfolio project, COPY
+# this file into /src/content/projects/<project-slug>.mdx (lowercase,
+# dashes-for-spaces), drop your images into
+# /src/content/projects/images/<project-slug>/, and update the frontmatter
+# values below.
+#
+# After committing the new file, Cloudflare Pages will rebuild and the
+# project will appear at /portfolio/<project-slug>/ within ~60 seconds.
+# ---------------------------------------------------------------------------
+
+# Display name shown on the portfolio card and at the top of the project page.
+title: "Project Name"
+
+# Date the project went live (or design completion). Used to sort the
+# portfolio when no `order:` is set. Format: YYYY-MM-DD.
+date: 2026-01-01
+
+# Where the project is located. Shown on the card and project header.
+location: "City, CA"
+
+# One sentence shown on the portfolio index card. Keep it under ~220 chars.
+summary: "One sentence description of the project for the portfolio card."
+
+# Cover image — also doubles as the hero image on the project page.
+# Save your photos / renderings to ./images/<project-slug>/ first.
+coverImage: "./images/<project-slug>/hero.webp"
+
+# Tags. Pick from: Residential, Commercial, Multi-family, Hospitality.
+categories:
+  - "Residential"
+
+# Lower numbers appear first on /portfolio. Omit to fall back to date desc.
+order: 99
+
+# Hides the project from /portfolio while keeping its URL live (useful for
+# preview links to send to clients). Remove or set to false to publish.
+draft: true
+
+# Galleries. Each gallery becomes a <Gallery /> block in the body below.
+# You can have multiple galleries — reference them with index 0, 1, 2…
+galleries:
+  - images:
+      - "./images/<project-slug>/rendering-1.webp"
+      - "./images/<project-slug>/rendering-2.webp"
+      - "./images/<project-slug>/rendering-3.webp"
+---
+
+import Gallery from "~/components/Gallery.astro";
+// Add one import per image, then list them in <Gallery images={[…]} /> below.
+import g0_0 from "./images/<project-slug>/rendering-1.webp";
+import g0_1 from "./images/<project-slug>/rendering-2.webp";
+import g0_2 from "./images/<project-slug>/rendering-3.webp";
+
+Write the project description here. Plain Markdown — paragraphs separated by
+blank lines.
+
+You can break a long description with a gallery in the middle:
+
+<Gallery images={[g0_0, g0_1, g0_2]} />
+
+Continue with another paragraph after the gallery. To add a second gallery
+later, just import more images with names like `g1_0`, `g1_1`, … and add
+another `<Gallery images={[g1_0, g1_1, …]} />` wherever you want it.

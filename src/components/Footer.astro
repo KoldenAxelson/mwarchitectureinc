@@ -1,0 +1,36 @@
+---
+import IconEnvelope from "~/components/icons/IconEnvelope.astro";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-warm-grey/40">
+  <div class="mx-auto max-w-5xl px-6 sm:px-8 py-16 sm:py-20 text-center">
+    <p
+      class="text-2xl sm:text-3xl text-near-black leading-snug"
+      style="font-family: var(--font-display);"
+      data-reveal="up"
+    >
+      Your vision, our passion.<br class="hidden sm:block" />
+      Enjoy the journey to great design.
+    </p>
+
+    <a
+      href="/contact"
+      class="mt-10 inline-flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-near-black border-b border-near-black pb-1 hover:text-terracotta hover:border-terracotta transition-colors"
+      data-reveal="up"
+      data-reveal-delay="180"
+    >
+      <IconEnvelope class="size-4" label="Email" />
+      Contact us
+    </a>
+
+    <p
+      class="mt-12 text-[11px] uppercase tracking-[0.22em] text-mid-grey"
+      data-reveal="up"
+      data-reveal-delay="320"
+    >
+      &copy; {year} MW Architecture, Inc. &middot; Solvang, CA
+    </p>
+  </div>
+</footer>
