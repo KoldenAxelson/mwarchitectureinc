@@ -11,6 +11,12 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   site: 'https://mwarchitectureinc.com',
 
+  // SSR mode is required by the Cloudflare adapter so /api/contact can
+  // run server-side. Each *page* opts back into static rendering with
+  // `export const prerender = true;` so the marketing site is still
+  // entirely pre-built — only API endpoints hit the Worker at runtime.
+  output: 'server',
+
   integrations: [
     vue(),
     mdx(),

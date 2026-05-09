@@ -2,14 +2,11 @@
 import { ref, computed } from "vue";
 
 /**
- * Contact form. POSTs JSON to a Cloudflare Worker that forwards via
- * Resend to both principals.
- *
- * The endpoint URL is supplied at build time through PUBLIC_CONTACT_ENDPOINT
- * (an Astro env var). In dev with no endpoint configured we surface a
- * sensible "config missing" state instead of silently failing.
+ * Contact form — posts same-origin to /api/contact, an Astro server
+ * endpoint that runs on the same Cloudflare Worker as the rest of the
+ * site. No CORS, no env var to wire up; secrets live on the Worker.
  */
-const ENDPOINT = import.meta.env.PUBLIC_CONTACT_ENDPOINT as string | undefined;
+const ENDPOINT = "/api/contact";
 
 const name = ref("");
 const email = ref("");
@@ -18,6 +15,35 @@ const projectType = ref("Residential");
 const message = ref("");
 // honeypot — bots auto-fill, humans don't see it
 const company = ref("");
+
+/**
+ * Auto-formats a US-style phone number as the user types:
+ *   ""           → ""
+ *   "8"          → "(8"
+ *   "818"        → "(818"
+ *   "8184"       → "(818) 4"
+ *   "818414"     → "(818) 414"
+ *   "8184147101" → "(818) 414-7101"
+ * Anything past 10 digits is ignored. Non-digit chars are stripped before
+ * re-formatting, so paste-and-tweak works naturally.
+ */
+function formatUsPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  if (digits.length === 0) return "";
+  if (digits.length <= 3) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function onPhoneInput(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const formatted = formatUsPhone(target.value);
+  phone.value = formatted;
+  // Mirror the canonical formatted string back into the field so the
+  // caret position lines up with the formatted view (Vue would otherwise
+  // hold the raw input until the next render).
+  target.value = formatted;
+}
 
 type Status = "idle" | "submitting" | "success" | "error";
 const status = ref<Status>("idle");
@@ -140,10 +166,14 @@ async function submit(e: Event) {
         </label>
         <input
           id="cf-phone"
-          v-model="phone"
+          :value="phone"
+          @input="onPhoneInput"
           type="tel"
+          inputmode="tel"
           autocomplete="tel"
-          class="w-full bg-transparent border-b border-warm-grey focus:border-near-black focus:outline-none py-2 text-body"
+          maxlength="14"
+          placeholder="(805) 555-0100"
+          class="w-full bg-transparent border-b border-warm-grey focus:border-near-black focus:outline-none py-2 text-body placeholder:text-warm-grey/70"
         />
       </div>
       <div>
@@ -231,8 +261,7 @@ async function submit(e: Event) {
     <p class="text-lg font-semibold text-near-black">Thanks — your message is on its way.</p>
     <p class="mt-2 text-sm text-body/80">
       We&rsquo;ll get back to you within a few business days. If it&rsquo;s
-      urgent, you can also email
-      <a class="underline hover:text-terracotta" href="mailto:hello@mwarchitectureinc.com">hello@mwarchitectureinc.com</a>.
+      urgent, you can also just give us a call directly!
     </p>
   </div>
 </template>
