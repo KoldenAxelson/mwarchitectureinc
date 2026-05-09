@@ -11,8 +11,12 @@ import emblaCarouselVue from "embla-carousel-vue";
  * exposes prev/next + bullet pagination.
  */
 interface HeroSlide {
+  /** Fallback <img src> — the WebP single URL. */
   src: string;
-  srcset?: string;
+  /** AVIF srcset (preferred when supported). */
+  avifSrcset?: string;
+  /** WebP srcset (universal modern fallback). */
+  webpSrcset?: string;
   width: number;
   height: number;
   alt: string;
@@ -110,19 +114,32 @@ onBeforeUnmount(() => {
             :tabindex="selectedIndex === i ? 0 : -1"
             class="relative shrink-0 grow-0 basis-full h-full focus:outline-none"
           >
-            <img
-              :src="slide.src"
-              :srcset="slide.srcset"
-              :width="slide.width"
-              :height="slide.height"
-              :alt="slide.alt"
-              sizes="100vw"
-              :loading="i === 0 ? 'eager' : 'lazy'"
-              :fetchpriority="i === 0 ? 'high' : 'auto'"
-              :decoding="i === 0 ? 'sync' : 'async'"
-              class="absolute inset-0 size-full object-cover select-none"
-              draggable="false"
-            />
+            <picture>
+              <source
+                v-if="slide.avifSrcset"
+                type="image/avif"
+                :srcset="slide.avifSrcset"
+                sizes="100vw"
+              />
+              <source
+                v-if="slide.webpSrcset"
+                type="image/webp"
+                :srcset="slide.webpSrcset"
+                sizes="100vw"
+              />
+              <img
+                :src="slide.src"
+                :width="slide.width"
+                :height="slide.height"
+                :alt="slide.alt"
+                sizes="100vw"
+                :loading="i === 0 ? 'eager' : 'lazy'"
+                :fetchpriority="i === 0 ? 'high' : 'auto'"
+                :decoding="i === 0 ? 'sync' : 'async'"
+                class="absolute inset-0 size-full object-cover select-none"
+                draggable="false"
+              />
+            </picture>
 
             <!--
               Two-layer overlay:

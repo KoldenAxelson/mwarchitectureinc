@@ -48,7 +48,11 @@ const projectsBySlug = new Map(projects.map((p) => [p.id, p]));
 
 // Resolve each service's example list to optimised slide data we can
 // hand straight to the Vue carousel component (no further image work
-// happens client-side).
+// happens client-side). Both AVIF + WebP variants generated so the
+// component can render <picture> and let the browser pick the best.
+const SERVICE_WIDTHS = [400, 600, 900, 1200];
+const SERVICE_SIZES = "(min-width: 1024px) 33vw, 100vw";
+
 const servicesWithSlides = await Promise.all(
   services.map(async (s) => {
     const slides = await Promise.all(
@@ -59,20 +63,30 @@ const servicesWithSlides = await Promise.all(
             `Services page references unknown project slug: ${ex.slug}`
           );
         }
-        const img = await getImage({
-          src: project.data.coverImage,
-          widths: [400, 600, 900, 1200],
-          sizes: "(min-width: 1024px) 33vw, 100vw",
-          format: "webp",
-          quality: 78,
-        });
+        const [avif, webp] = await Promise.all([
+          getImage({
+            src: project.data.coverImage,
+            widths: SERVICE_WIDTHS,
+            sizes: SERVICE_SIZES,
+            format: "avif",
+            quality: 60,
+          }),
+          getImage({
+            src: project.data.coverImage,
+            widths: SERVICE_WIDTHS,
+            sizes: SERVICE_SIZES,
+            format: "webp",
+            quality: 78,
+          }),
+        ]);
         return {
           slug: ex.slug,
           label: ex.label,
-          src: img.src,
-          srcset: img.srcSet?.attribute ?? undefined,
-          width: img.attributes.width ?? project.data.coverImage.width,
-          height: img.attributes.height ?? project.data.coverImage.height,
+          src: webp.src,
+          avifSrcset: avif.srcSet?.attribute ?? undefined,
+          webpSrcset: webp.srcSet?.attribute ?? undefined,
+          width: webp.attributes.width ?? project.data.coverImage.width,
+          height: webp.attributes.height ?? project.data.coverImage.height,
           alt: `${project.data.title} — ${project.data.location}`,
         };
       })

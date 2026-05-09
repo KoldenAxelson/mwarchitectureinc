@@ -49,15 +49,10 @@ const ogImageUrl = ogImage
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Montserrat — 600 is used for headings/nav/logo, 500 picks up
-         display details where the body system stack feels under-designed
-         (contact dropdown, phone numbers, email links). -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap"
-    />
+    <!-- Per-page resource hints (e.g. hero image preload on /). Pages
+         opt in via <Fragment slot="head"> so we don't block rendering
+         on hints that aren't relevant. -->
+    <slot name="head" />
   </head>
 
   <body class="min-h-screen flex flex-col">

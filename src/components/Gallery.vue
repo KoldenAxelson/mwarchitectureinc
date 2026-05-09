@@ -10,10 +10,12 @@ import emblaCarouselVue from "embla-carousel-vue";
  * before the JS hydrates. JS only takes over to enable swipe + dot nav.
  */
 interface ImageItem {
-  /** Final src URL (already optimised by Astro). */
+  /** Fallback <img src> — the WebP single URL. */
   src: string;
-  /** Optional srcset for responsive delivery. */
-  srcset?: string;
+  /** AVIF srcset (preferred when supported). */
+  avifSrcset?: string;
+  /** WebP srcset (universal modern fallback). */
+  webpSrcset?: string;
   /** Width / height as emitted by Astro's <Image />. */
   width: number;
   height: number;
@@ -115,19 +117,32 @@ const showControls = computed(() => props.images.length > 1);
               showControls ? `${i + 1} of ${images.length}` : undefined
             "
           >
-            <img
-              :src="img.src"
-              :srcset="img.srcset"
-              :sizes="sizes"
-              :width="img.width"
-              :height="img.height"
-              :alt="img.alt"
-              :loading="i < perView ? 'eager' : 'lazy'"
-              :decoding="i < perView ? 'sync' : 'async'"
-              :fetchpriority="i === 0 ? 'high' : 'auto'"
-              class="block w-full h-full object-cover select-none"
-              draggable="false"
-            />
+            <picture>
+              <source
+                v-if="img.avifSrcset"
+                type="image/avif"
+                :srcset="img.avifSrcset"
+                :sizes="sizes"
+              />
+              <source
+                v-if="img.webpSrcset"
+                type="image/webp"
+                :srcset="img.webpSrcset"
+                :sizes="sizes"
+              />
+              <img
+                :src="img.src"
+                :sizes="sizes"
+                :width="img.width"
+                :height="img.height"
+                :alt="img.alt"
+                :loading="i < perView ? 'eager' : 'lazy'"
+                :decoding="i < perView ? 'sync' : 'async'"
+                :fetchpriority="i === 0 ? 'high' : 'auto'"
+                class="block w-full h-full object-cover select-none"
+                draggable="false"
+              />
+            </picture>
           </div>
         </div>
       </div>

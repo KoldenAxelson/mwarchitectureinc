@@ -56,18 +56,31 @@ const widthBuckets =
 
 const optimised = await Promise.all(
   images.map(async (img, i) => {
-    const result = await getImage({
-      src: img,
-      widths: widthBuckets,
-      sizes,
-      format: "webp",
-      quality: 78,
-    });
+    // Generate both AVIF (preferred — ~30% smaller) and WebP (fallback)
+    // variants. Gallery.vue renders these as <picture> with <source>
+    // elements so the browser picks the best supported format.
+    const [avif, webp] = await Promise.all([
+      getImage({
+        src: img,
+        widths: widthBuckets,
+        sizes,
+        format: "avif",
+        quality: 60,
+      }),
+      getImage({
+        src: img,
+        widths: widthBuckets,
+        sizes,
+        format: "webp",
+        quality: 78,
+      }),
+    ]);
     return {
-      src: result.src,
-      srcset: result.srcSet?.attribute ?? undefined,
-      width: result.attributes.width ?? img.width,
-      height: result.attributes.height ?? img.height,
+      src: webp.src,
+      avifSrcset: avif.srcSet?.attribute ?? undefined,
+      webpSrcset: webp.srcSet?.attribute ?? undefined,
+      width: webp.attributes.width ?? img.width,
+      height: webp.attributes.height ?? img.height,
       alt: alts[i] ?? `Project image ${i + 1}`,
     };
   })

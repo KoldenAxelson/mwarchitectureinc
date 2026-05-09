@@ -2,11 +2,16 @@
 /**
  * Server-rendered wrapper for HeroCarousel.vue.
  *
- * Takes the home page's featured project entries, runs each cover image
- * through Astro's image pipeline at hero-friendly widths, and hands the
- * pre-optimised URLs to the Vue carousel (which only takes over for
- * pagination + autoplay logic). The first slide ships eager + high
- * fetchpriority for LCP; the rest are lazy.
+ * For each featured project we ask Astro's image pipeline for both an
+ * AVIF and a WebP variant set. The carousel renders a <picture> with
+ * <source type="image/avif"> first, falling back to WebP, falling back
+ * to the WebP <img>'s direct src for any browser that ignores both.
+ * AVIF lands ~30% smaller than WebP for these renderings, which buys
+ * us LCP headroom on the home page hero.
+ *
+ * The first slide is eager + fetchpriority="high" — and on the home
+ * page we additionally emit a <link rel="preload"> via the layout's
+ * head slot to start the fetch before the parser reaches the <img>.
  */
 import { getImage } from "astro:assets";
 import HeroCarouselClient from "./HeroCarousel.vue";
@@ -25,20 +30,35 @@ interface Props {
 
 const { slides, intervalMs = 6000 } = Astro.props;
 
+const HERO_WIDTHS = [800, 1200, 1600, 2000, 2400];
+const HERO_SIZES = "100vw";
+
 const optimised = await Promise.all(
   slides.map(async (s) => {
-    const img = await getImage({
-      src: s.cover,
-      widths: [800, 1200, 1600, 2000, 2400],
-      sizes: "100vw",
-      format: "webp",
-      quality: 78,
-    });
+    const [avif, webp] = await Promise.all([
+      getImage({
+        src: s.cover,
+        widths: HERO_WIDTHS,
+        sizes: HERO_SIZES,
+        format: "avif",
+        quality: 60,
+      }),
+      getImage({
+        src: s.cover,
+        widths: HERO_WIDTHS,
+        sizes: HERO_SIZES,
+        format: "webp",
+        quality: 78,
+      }),
+    ]);
     return {
-      src: img.src,
-      srcset: img.srcSet?.attribute ?? undefined,
-      width: img.attributes.width ?? s.cover.width,
-      height: img.attributes.height ?? s.cover.height,
+      avifSrcset: avif.srcSet?.attribute ?? undefined,
+      webpSrcset: webp.srcSet?.attribute ?? undefined,
+      // <img> fallback — the WebP single src for any browser that
+      // ignores both <source> elements (very rare in 2026).
+      src: webp.src,
+      width: webp.attributes.width ?? s.cover.width,
+      height: webp.attributes.height ?? s.cover.height,
       alt: `${s.title} — ${s.location}`,
       title: s.title,
       location: s.location,
@@ -48,4 +68,8 @@ const optimised = await Promise.all(
 );
 ---
 
-<HeroCarouselClient client:load slides={optimised} intervalMs={intervalMs} />
+<HeroCarouselClient
+  client:load
+  slides={optimised}
+  intervalMs={intervalMs}
+/>

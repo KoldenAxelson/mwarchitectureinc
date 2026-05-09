@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource-variable/montserrat/wght.css";
 
 /* ----------------------------------------------------------------
    MW Architecture — design tokens.
@@ -6,20 +7,20 @@
    Body:     Helvetica/Segoe UI/Arial system stack (also matches).
 ---------------------------------------------------------------- */
 @theme {
-  --color-off-white:  #edeee9;
-  --color-dark-green: #243328;  /* legacy brand — used by favicon, not UI */
+  --color-off-white: #edeee9;
+  --color-dark-green: #243328; /* legacy brand — used by favicon, not UI */
   --color-near-black: #111111;
-  --color-body:       #222222;
-  --color-warm-grey:  #a7a49f;
-  --color-sage:       #a1c2a1;
-  --color-mid-grey:   #84807a;
+  --color-body: #222222;
+  --color-warm-grey: #a7a49f;
+  --color-sage: #a1c2a1;
+  --color-mid-grey: #84807a;
 
   /* Accent — warm peachy terracotta for hover states + active text. */
-  --color-terracotta:        #c97354;
-  --color-terracotta-soft:   #f0c8b5;
+  --color-terracotta: #c97354;
+  --color-terracotta-soft: #f0c8b5;
 
   --font-display: "Montserrat", "Helvetica", "Segoe UI", Arial, sans-serif;
-  --font-sans:    "Helvetica", "Segoe UI", Arial, sans-serif;
+  --font-sans: "Helvetica", "Segoe UI", Arial, sans-serif;
 
   --tracking-display: 0.02em;
 }
@@ -37,7 +38,12 @@
     font-weight: 400;
     line-height: 1.6;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: var(--color-near-black);
     font-family: var(--font-display);
     font-weight: 600;
@@ -48,7 +54,9 @@
     background-color: var(--color-terracotta-soft);
     color: var(--color-near-black);
   }
-  a { color: inherit; }
+  a {
+    color: inherit;
+  }
 }
 
 /* ----------------------------------------------------------------
@@ -67,10 +75,18 @@
       transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
     will-change: opacity, transform;
   }
-  [data-reveal="up"]    { transform: translate3d(0, 24px, 0); }
-  [data-reveal="left"]  { transform: translate3d(-32px, 0, 0); }
-  [data-reveal="right"] { transform: translate3d(32px, 0, 0); }
-  [data-reveal="fade"]  { transform: none; }
+  [data-reveal="up"] {
+    transform: translate3d(0, 24px, 0);
+  }
+  [data-reveal="left"] {
+    transform: translate3d(-32px, 0, 0);
+  }
+  [data-reveal="right"] {
+    transform: translate3d(32px, 0, 0);
+  }
+  [data-reveal="fade"] {
+    transform: none;
+  }
 
   [data-reveal].is-revealed {
     opacity: 1;

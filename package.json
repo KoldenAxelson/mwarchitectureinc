@@ -19,6 +19,7 @@
     "@astrojs/mdx": "^4.2.6",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/vue": "^5.0.13",
+    "@fontsource-variable/montserrat": "^5.2.8",
     "@tailwindcss/vite": "^4.1.5",
     "astro": "^5.7.13",
     "embla-carousel-vue": "^8.5.2",

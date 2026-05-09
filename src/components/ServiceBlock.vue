@@ -12,8 +12,12 @@ import emblaCarouselVue from "embla-carousel-vue";
 interface Slide {
   slug: string;
   label: string;
+  /** Fallback <img src> — the WebP single URL. */
   src: string;
-  srcset?: string;
+  /** AVIF srcset (preferred when supported). */
+  avifSrcset?: string;
+  /** WebP srcset (universal modern fallback). */
+  webpSrcset?: string;
   width: number;
   height: number;
   alt: string;
@@ -106,17 +110,30 @@ onBeforeUnmount(() => {
               :aria-roledescription="'slide'"
               :aria-label="`${i + 1} of ${slides.length}: ${s.label}`"
             >
-              <img
-                :src="s.src"
-                :srcset="s.srcset"
-                :width="s.width"
-                :height="s.height"
-                :alt="s.alt"
-                sizes="(min-width: 1024px) 33vw, 100vw"
-                :loading="i === 0 ? 'eager' : 'lazy'"
-                :decoding="i === 0 ? 'sync' : 'async'"
-                class="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-              />
+              <picture>
+                <source
+                  v-if="s.avifSrcset"
+                  type="image/avif"
+                  :srcset="s.avifSrcset"
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                />
+                <source
+                  v-if="s.webpSrcset"
+                  type="image/webp"
+                  :srcset="s.webpSrcset"
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                />
+                <img
+                  :src="s.src"
+                  :width="s.width"
+                  :height="s.height"
+                  :alt="s.alt"
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  :loading="i === 0 ? 'eager' : 'lazy'"
+                  :decoding="i === 0 ? 'sync' : 'async'"
+                  class="size-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                />
+              </picture>
             </div>
           </div>
         </div>
