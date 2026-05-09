@@ -33,3 +33,7 @@ docs/
 
 # scratch
 scripts/scrape-tmp/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
