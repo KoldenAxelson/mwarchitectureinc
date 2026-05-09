@@ -2,6 +2,8 @@
 import "~/styles/global.css";
 import Nav from "~/components/Nav.astro";
 import Footer from "~/components/Footer.astro";
+import { getImage } from "astro:assets";
+import logo from "~/assets/logo.png";
 
 interface Props {
   title: string;
@@ -22,6 +24,16 @@ const siteName = "MW Architecture";
 const ogImageUrl = ogImage
   ? new URL(ogImage, Astro.site).toString()
   : new URL("/og-default.jpg", Astro.site).toString();
+
+// Favicon variants — generated from /src/assets/logo.png at build time so
+// the URL changes whenever the logo changes, naturally cache-busting the
+// browser's aggressive favicon cache. Astro dedupes these calls across
+// the whole build, so emitting them per-page is free.
+const [favicon32, favicon192, appleTouch] = await Promise.all([
+  getImage({ src: logo, width: 32, height: 32, format: "png" }),
+  getImage({ src: logo, width: 192, height: 192, format: "png" }),
+  getImage({ src: logo, width: 180, height: 180, format: "png" }),
+]);
 ---
 
 <!doctype html>
@@ -46,7 +58,26 @@ const ogImageUrl = ogImage
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Favicon set, generated from the brand emblem at build time. -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href={favicon32.src}
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href={favicon192.src}
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={appleTouch.src}
+    />
+    <meta name="theme-color" content="#edeee9" />
+
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Per-page resource hints (e.g. hero image preload on /). Pages
